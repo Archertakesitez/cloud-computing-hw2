@@ -1,6 +1,6 @@
 services:
   web:
-    image: todo-flask-app
+    image: archertakesitez/todo-flask-app:latest
     ports:
       - "3000:5000"
     depends_on:
