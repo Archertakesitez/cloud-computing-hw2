@@ -36,8 +36,8 @@
    ```
 
 3. Get the service URL:
-```
-minikube service todo-flask-app
-```
+   ```
+   minikube service todo-flask-app
+   ```
 
 4. Access the application using the provided URL
