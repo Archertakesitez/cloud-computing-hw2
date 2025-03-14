@@ -17,7 +17,7 @@
 
 2. Run with Docker Compose:
    ```
-   docker-compose up
+   docker compose up
    ```
 
 3. Access the application at http://localhost:3000
