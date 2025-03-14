@@ -11,8 +11,8 @@
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/flask-todo-kubernetes.git
-   cd flask-todo-kubernetes
+   git clone git@github.com:Archertakesitez/cloud-computing-hw2.git
+   cd cloud-computing-hw2
    ```
 
 2. Run with Docker Compose:
