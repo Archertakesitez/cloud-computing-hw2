@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: todo-flask-rc
+spec:
+  replicas: 5
+  selector:
+    app: todo-flask-app
+  template:
+    metadata:
+      labels:
+        app: todo-flask-app
+    spec:
+      containers:
+      - name: todo-flask-app
+        image: archertakesitez/todo-flask-app:latest
+        command: ["flask"]
+        args: ["run", "--host=0.0.0.0", "--port=5000"]
+        ports:
+        - containerPort: 5000
+        env:
+        - name: MONGO_HOST
+          value: "mongodb"
+        - name: MONGO_PORT
+          value: "27017"
+        - name: FLASK_ENV
+          value: "development" 

@@ -6,7 +6,12 @@ spec:
   selector:
     matchLabels:
       app: todo-flask-app
-  replicas: 3  # Create 3 replicas
+  replicas: 3  # Increase to 3 replicas to better demonstrate rolling updates
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1  # Maximum number of pods that can be unavailable during the update
+      maxSurge: 1        # Maximum number of pods that can be created over the desired number
   template:
     metadata:
       labels:
