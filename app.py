@@ -28,6 +28,17 @@ def redirect_url():
     return request.args.get("next") or request.referrer or url_for("index")
 
 
+@app.route("/alive")
+def alive():
+    # liveness check
+    return "Ok"
+
+
+@app.route("ready")
+def ready():
+    return db.command("ping")
+
+
 @app.route("/list")
 def lists():
     # Display the all Tasks
