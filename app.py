@@ -34,7 +34,7 @@ def alive():
     return "Ok"
 
 
-@app.route("ready")
+@app.route("/ready")
 def ready():
     return db.command("ping")
 
