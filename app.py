@@ -9,6 +9,7 @@ from pymongo import MongoClient  # Database connector
 from bson.objectid import ObjectId  # For ObjectId to work
 from bson.errors import InvalidId  # For catching InvalidId exception for ObjectId
 import os
+from prometheus_flask_exporter import PrometheusMetrics  # Add this import
 
 mongodb_host = os.environ.get("MONGO_HOST", "localhost")
 mongodb_port = int(os.environ.get("MONGO_PORT", "27017"))
@@ -22,6 +23,10 @@ app = Flask(__name__)
 title = "TODO with Flask"
 heading = "ToDo Reminder - Version 2.0"
 # modify=ObjectId()
+
+# Initialize Prometheus metrics
+metrics = PrometheusMetrics(app)
+metrics.info("app_info", "Application info", version="1.0.3")
 
 
 def redirect_url():
@@ -88,6 +93,7 @@ def done():
 # 	return render_template('add.html',h=heading,t=title)
 
 
+@metrics.counter("todo_tasks_created", "Number of todo tasks created")
 @app.route("/action", methods=["POST"])
 def action():
     # Adding a Task

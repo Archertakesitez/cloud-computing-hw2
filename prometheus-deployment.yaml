@@ -8,11 +8,74 @@ data:
     global:
       scrape_interval: 15s
       evaluation_interval: 15s
+    # Add alerting configuration
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets:
+          - alertmanager:9093
+    # Add rules file reference
+    rule_files:
+      - /etc/prometheus/alert.rules
     scrape_configs:
-      - job_name: 'prometheus'
-        static_configs:
-          - targets: 
-              - proxy-service:80
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+        - role: pod
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?
+          replacement: $1:5000
+          target_label: __address__
+
+      - job_name: 'kubernetes-nodes'
+        kubernetes_sd_configs:
+        - role: node
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_node_label_(.+)
+
+      - job_name: 'kubernetes-apiservers'
+        kubernetes_sd_configs:
+        - role: endpoints
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+          action: keep
+          regex: default;kubernetes;https
+
+  # Add alert rules
+  alert.rules: |
+    groups:
+    - name: pod_alerts
+      rules:
+      - alert: MongoDBDown
+        expr: absent(kube_pod_info{pod=~"mongodb.*"})
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB is down"
+          description: "MongoDB database is not running"
+
+      - alert: FlaskAppDown
+        expr: absent(kube_pod_info{pod=~"todo-flask-app.*"})
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Flask App is down"
+          description: "Todo Flask application is not running"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -29,6 +92,7 @@ spec:
       labels:
         app: prometheus-server
     spec:
+      serviceAccountName: prometheus
       containers:
         - name: prometheus
           image: prom/prometheus
